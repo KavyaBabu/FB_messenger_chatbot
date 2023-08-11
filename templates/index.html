@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>Fake News📰 Detection System</title>
+<style>
+  .tb { border-collapse: collapse; margin: 0 auto; width: 80%; }
+  thead th, tr td { padding: 5px; border: solid 1px #777; }
+  thead th { background-color: lightblue; }
+
+ul {
+	list-style: none;
+	padding: 0;
+}
+
+li + li {
+	margin-top: 1rem;
+}
+
+li {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	background: aliceblue;
+	padding: 1.5rem;
+	border-radius: 1rem;
+	width: calc(100% - 2rem);
+	box-shadow: 0.25rem 0.25rem 0.75rem rgb(0 0 0 / 0.1);
+}
+
+li::before {
+	counter-increment: list-item;
+	content: counter(list-item);
+	font-size: 3rem;
+	font-weight: 700;
+	width: 2em;
+	height: 2em;
+	background: lightslategrey;
+	flex: 0 0 auto;
+	border-radius: 50%;
+	color: white;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+li:nth-child(even) {
+	flex-direction: row-reverse;
+	background: lavender;
+	margin-right: -2rem;
+	margin-left: 2rem;
+}
+.container .left,
+.container .right {
+    display: inline-block;
+}
+
+.container .left {
+    width: 40%;
+    float: left;
+    padding: 0 20px 0 0;
+}
+.container .right {
+    width: 40%;
+    float: right;
+}
+</style>
+</head>
+
+<body>
+	<html>
+<head>
+    <title>Home</title>
+    <!-- <link rel="stylesheet" type="text/css" href="static/css/style.css"> -->
+</head>
+<body>
+    {% if posts_details %}
+        <table border="1" class="tb">
+            <thead>
+                <th>Profile Name </th>
+                <th> Posts </th>
+                <th> Prediction Score</th>
+            </thead>
+            <tbody>
+                {% for index, item in posts_details %}
+                <form action="/result" method="post" >
+                <tr>
+                <td><img src="{{ item['Image'] }}" width="50" height="50"> {{ item['name'] }}</td>
+                <input type="hidden" name="url" value="{{ item.url }}" />
+                <td>{{ item['text'] }}</td>
+                <input type="hidden" name="text" value="{{ item.text }}" />
+                <td>{{ item['predict_score'] }}</td>
+                <input type="number" name="index_val" value="{{ index }}" hidden/>
+                <td><button type="submit">View Poster Trends/Information</button></td>
+                </tr>
+                </form>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+
+    {% endif %}
+</body>
+</html>
+ </body>
+
+ {% if exp %}
+        
+        <div class="container">
+            <div class="left">
+                <h2 align="center"> Explainable AI </h2>
+                <h3 align="center">LIME-explained results</h3>
+                {{ exp |safe }}
+            </div>
+            <div class="right">
+                <h3 align="center">Post Trends of this User</h3>
+                <ul class="posts_list">
+                    {% for result in poster_info %}
+                    <li>{{ result['text'] }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+{% else %}
+
+
+
+{% endif %}
