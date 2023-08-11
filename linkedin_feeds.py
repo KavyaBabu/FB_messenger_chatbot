@@ -8,6 +8,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
+import re
+from nltk.corpus import stopwords
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -48,9 +50,16 @@ def retrieve_feed(driver):
     total = len(feed_complete_block)
     return total
 
+def preprocess_text(text):
+    text = re.sub(r'http\S+', '', text.lower())
+    text = re.sub('[^a-zA-Z\s]', '', str(text))
+    stopwords_dict = {word: 1 for word in stopwords.words("english")}
+    text = " ".join([word for word in text.split() if word not in stopwords_dict])
+    return text
 
 def test_news(str):
 
+    str = preprocess_text(str)
     with open('tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
 
@@ -62,18 +71,16 @@ def test_news(str):
     value = result[0][0]
 
     if value == 1:
-        return round(res[0][0],2),"This is True"
+        return round(res[0][0],2),"True"
     else:
-        return round(res[0][0],2),"This is Fake"
+        return round(res[0][0],2),"Fake"
 
 @app.route('/')
 def home():
-# poster_name = driver.find_elements(By.XPATH,"//span[contains(@class,'update-components-actor__title')]").text
-# posts.append(poster_name)
     service_obj = Service(r"C:/Users/kavya/Downloads/chromedriver_win32/chromedriver.exe")
     driver = webdriver.Chrome(options=chrome_options,service=service_obj)
     total = retrieve_feed(driver)
-    for i in range(0,total):
+    for i in range(0,7):
         post_details = {}
         img_src = driver.find_elements(By.XPATH,"//div[contains(@class,'update-components-actor__image relative')]/span/div/div/img")[i].get_attribute('src')
         post_details['Image'] = img_src
@@ -89,12 +96,9 @@ def home():
         post_details['predict_score'],post_details['result'] = test_news([posts_text])
         posts_dd.append(post_details)
 
-    # posts_df = pd.DataFrame(posts_dd)
-    # poster_info = [[{'text': 'The values instilled by his upbringing in rural Virginia have a heavy influence in how Kevin Scott sees his role in building AI safely and responsibly. Hear his story on . '}, {'text': 'What does Chopin’s G Minor Ballade teach us about #AI and human connection? Find out on my conversation with Microsoft CTO Kevin Scott on .'}, {'text': 'One of the greatest threats to the health of a community is lack of affordable housing. Building housing at all income levels in the Puget Sound will take more than money. It will take creativity and cooperation. Microsoft is committed to help find strategies that scale.'}],[{'text': 'The values instilled by his upbringing in rural Virginia have a heavy influence in how Kevin Scott sees his role in building AI safely and responsibly. Hear his story on . '}, {'text': 'What does Chopin’s G Minor Ballade teach us about #AI and human connection? Find out on my conversation with Microsoft CTO Kevin Scott on .'}, {'text': 'One of the greatest threats to the health of a community is lack of affordable housing. Building housing at all income levels in the Puget Sound will take more than money. It will take creativity and cooperation. Microsoft is committed to help find strategies that scale.'}]]
     poster_info = retrieve_poster_information(driver,post_urls)
     with open("poster_info.json", "w") as outfile:
         json.dump(poster_info, outfile)
-    # return render_template('index.html', tables=[posts_df.to_html(classes='data',escape=False)], titles=posts_df.columns.values, text_list=text_list)
     return render_template('index.html', posts_details = enumerate(posts_dd), text_list=text_list)
 
 @app.route('/result', methods=['POST'])
@@ -105,6 +109,7 @@ def index():
      poster_info = json.load(openfile)
     ind = int(ind)
     poster_info_idx = poster_info[ind]
+    text = preprocess_text(text)
     ex = explainer.explain_instance(text,predict_prob)
     return render_template('index.html', exp=ex.as_html(), poster_info = poster_info_idx)
 
@@ -146,7 +151,6 @@ def retrieve_poster_information(driver,post_urls):
                 post_details['text'] = posts_text
                 text_list.append(posts_text)
                 empty_arr.append(post_details)
-                # post_details['predict_score'],post_details['result'] = test_news([posts_text])
             poster_info.append(empty_arr)
         else:
             driver.implicitly_wait(10)
@@ -167,7 +171,6 @@ def retrieve_poster_information(driver,post_urls):
                 posts_text = driver.find_elements(By.XPATH,"//div[contains(@class,'update-components-text relative feed-shared-update-v2__commentary')]/span")[i].text
                 post_details['text'] = posts_text
                 empty_arr.append(post_details)
-                # post_details['predict_score'],post_details['result'] = test_news([posts_text])
             poster_info.append(empty_arr)
 
     return poster_info
