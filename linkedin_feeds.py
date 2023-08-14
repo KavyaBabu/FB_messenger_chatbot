@@ -33,7 +33,7 @@ global poster_info
 poster_info = []
 
 def retrieve_feed(driver):
-    username= "kavyababu17@gmail.com"
+    username= "kavyapriyait@gmail.com"
     password = "Kavyababu1789@!"
     driver.get('https://www.linkedin.com/home')
     driver.find_element(By.XPATH,"//input[@type='text']").send_keys(username)
@@ -51,7 +51,8 @@ def retrieve_feed(driver):
     return total
 
 def preprocess_text(text):
-    text = re.sub(r'http\S+', '', text.lower())
+    # text = text.str.lower()
+    # text = re.sub(r'http\S+', '', str(text))
     text = re.sub('[^a-zA-Z\s]', '', str(text))
     stopwords_dict = {word: 1 for word in stopwords.words("english")}
     text = " ".join([word for word in text.split() if word not in stopwords_dict])
@@ -114,6 +115,9 @@ def index():
     return render_template('index.html', exp=ex.as_html(), poster_info = poster_info_idx)
 
 def predict_prob(text):
+
+    text = preprocess_text(text)
+    
     with open('tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
 
