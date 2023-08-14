@@ -33,16 +33,14 @@ global poster_info
 poster_info = []
 
 def retrieve_feed(driver):
-    username= "kavyapriyait@gmail.com"
-    password = "Kavyababu1789@!"
+    username= ""
+    password = ""
     driver.get('https://www.linkedin.com/home')
     driver.find_element(By.XPATH,"//input[@type='text']").send_keys(username)
     driver.find_element(By.XPATH,"//input[@type='password']").send_keys(password)
     driver.find_element(By.XPATH,"//button[@type='submit']").click()
-    # driver.get('https://www.linkedin.com/feed/')
     driver.current_url
     feed_complete_block = driver.find_elements(By.XPATH,"//div[@class='scaffold-finite-scroll__content']/div")
-    # print(feed_complete_block)
     for feed in feed_complete_block:
         driver.execute_script("arguments[0].scrollIntoView();",feed)
         time.sleep(3)
@@ -117,7 +115,7 @@ def index():
 def predict_prob(text):
 
     text = preprocess_text(text)
-    
+
     with open('tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
 
