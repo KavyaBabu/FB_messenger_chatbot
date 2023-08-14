@@ -97,21 +97,15 @@ embedding_vector = get_weight_matrix(w2vModel)
 
 """### **Architect Model with CNN & LSTM**"""
 
-# model = Sequential()
-# model.add(Embedding(vocab_size,output_dim=100, weights = [embedding_vector], input_length= 1000, trainable= False))
-# model.add(Conv1D(32,4,activation='relu'))
-# model.add(AvgPool1D())
-# model.add(Conv1D(64,4,activation='relu'))
-# model.add(AvgPool1D())
-# model.add(LSTM(units=128))
-# model.add(Dense(1, activation='sigmoid'))
-# model.summary()
-# model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
-
 model = Sequential()
 model.add(Embedding(vocab_size,output_dim=100, weights = [embedding_vector], input_length= 1000, trainable= False))
+model.add(Conv1D(32,4,activation='relu'))
+model.add(AvgPool1D())
+model.add(Conv1D(64,4,activation='relu'))
+model.add(AvgPool1D())
 model.add(LSTM(units=128))
 model.add(Dense(1, activation='sigmoid'))
+model.summary()
 model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
 
 X_train, X_test, y_train, y_test = train_test_split(data,label)
